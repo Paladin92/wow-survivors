@@ -30,22 +30,26 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface((30, 30))
         self.image.fill(self.color)
         self.rect = self.image.get_rect(center=(x, y))
+        self._last_update = pygame.time.get_ticks()
         
     def update(self, keys_pressed):
+        current_time = pygame.time.get_ticks()
+        dt = current_time - self._last_update
+        
         if self.camouflage:
-            self.camouflage_timer -= pygame.time.get_ticks() - self._last_update
+            self.camouflage_timer -= dt
             if self.camouflage_timer <= 0:
                 self.camouflage = False
         if self.purify:
-            self.purify_timer -= pygame.time.get_ticks() - self._last_update
+            self.purify_timer -= dt
             if self.purify_timer <= 0:
                 self.purify = False
         if self.slow_timer > 0:
-            self.slow_timer -= pygame.time.get_ticks() - self._last_update
+            self.slow_timer -= dt
             if self.slow_timer < 0:
                 self.slow_timer = 0
                 
-        self._last_update = pygame.time.get_ticks()
+        self._last_update = current_time
         
         if keys_pressed[pygame.K_LEFT]:
             self.rect.x -= self.speed
