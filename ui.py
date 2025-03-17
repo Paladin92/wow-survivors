@@ -1,4 +1,5 @@
 import pygame
+import sys
 from settings import *
 from utils import draw_text, draw_background
 
