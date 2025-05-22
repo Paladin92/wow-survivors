@@ -25,7 +25,9 @@ class Player(pygame.sprite.Sprite):
         self.camouflage_timer = 0
         self.purify = False
         self.purify_timer = 0
-        self.damage_reduction = 0
+        self.base_damage_reduction = 0
+        self.damage_reduction = self.base_damage_reduction
+        self.projectile_speed = 7
         self.slow_timer = 0
         self.image = pygame.Surface((30, 30))
         self.image.fill(self.color)
@@ -81,26 +83,26 @@ class Player(pygame.sprite.Sprite):
             if self.pattern == "8_directions":
                 for i in range(8):
                     angle = i * (2 * math.pi / 8)
-                    projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage))
+                    projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage, self.projectile_speed))
             elif self.pattern == "4_directions":
                 for i in range(4):
                     angle = i * (2 * math.pi / 4)
-                    projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage))
+                    projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage, self.projectile_speed))
             elif self.pattern == "6_directions":
                 for i in range(6):
                     angle = i * (2 * math.pi / 6)
-                    projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage))
+                    projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage, self.projectile_speed))
             elif self.pattern == "aimed":
                 nearest, _ = self.find_nearest_enemy(enemy_group)
                 if nearest:
                     dx = nearest.rect.centerx - self.rect.centerx
                     dy = nearest.rect.centery - self.rect.centery
                     angle = math.atan2(dy, dx)
-                    projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage))
+                    projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage, self.projectile_speed))
                 else:
                     for i in range(8):
                         angle = i * (2 * math.pi / 8)
-                        projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage))
+                        projectiles.append(Projectile(self.rect.centerx, self.rect.centery, angle, self.damage, self.projectile_speed))
             else:
                 for i in range(8):
                     angle = i * (2 * math.pi / 8)
@@ -121,6 +123,7 @@ class Enemy(pygame.sprite.Sprite):
             self.image.fill((128, 0, 128))
         self.rect = self.image.get_rect(center=(x, y))
         self.slow_timer = 0
+        self.stun_timer = 0
         self._last_update = pygame.time.get_ticks()
         
     def update(self, player, dt):
@@ -128,6 +131,12 @@ class Enemy(pygame.sprite.Sprite):
         dt = current_time - self._last_update
         self._last_update = current_time
         
+        if self.stun_timer > 0:
+            self.stun_timer -= dt
+            if self.stun_timer < 0:
+                self.stun_timer = 0
+            return
+
         dx = player.rect.centerx - self.rect.centerx
         dy = player.rect.centery - self.rect.centery
         distance = math.hypot(dx, dy)
@@ -162,7 +171,13 @@ class Boss(Enemy):
         current_time = pygame.time.get_ticks()
         dt = current_time - self._last_update
         self._last_update = current_time
-        
+
+        if self.stun_timer > 0:
+            self.stun_timer -= dt
+            if self.stun_timer < 0:
+                self.stun_timer = 0
+            return
+
         dx = player.rect.centerx - self.rect.centerx
         dy = player.rect.centery - self.rect.centery
         distance = math.hypot(dx, dy)
@@ -178,13 +193,13 @@ class Boss(Enemy):
         self.rect.y += dy * speed
 
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, x, y, angle, damage):
+    def __init__(self, x, y, angle, damage, speed=7):
         super().__init__()
         self.image = pygame.Surface((10, 10), pygame.SRCALPHA)
         pygame.draw.circle(self.image, (255, 255, 0), (5, 5), 5)
         self.rect = self.image.get_rect(center=(x, y))
         self.angle = angle
-        self.speed = 7
+        self.speed = speed
         self.damage = damage
         
     def update(self):
