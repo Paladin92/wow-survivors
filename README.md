@@ -89,7 +89,7 @@ pip install pygame
 
 4. Run the game:
 ```bash
-python WoWSurvivors.py
+python main.py
 ```
 
 ## 🎛️ Controls
