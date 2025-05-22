@@ -111,6 +111,7 @@ class Game:
                     score += 100
                     if random.random() < 0.5:
                         self.coin_group.add(Coin(enemy.rect.centerx, enemy.rect.centery))
+            if hits:
                 proj.kill()
         
         # Handle pickup collisions
