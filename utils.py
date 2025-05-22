@@ -32,6 +32,15 @@ def apply_upgrade(player, upgrade, current_time):
             player.camouflage_timer = upgrade.get("duration", 3000)
         elif upgrade["effect"] == "mana_shield":
             player.mana_shield = True
+            player.base_damage_reduction += upgrade.get("damage_reduction", 0.2)
+            player.damage_reduction = player.base_damage_reduction
+        elif upgrade["effect"] == "rapid_fire":
+            player.fire_rate = max(100, player.fire_rate - upgrade.get("reduction", 100))
+        elif upgrade["effect"] == "eagle_eye":
+            player.projectile_speed += upgrade.get("range_bonus", 2)
+        elif upgrade["effect"] == "shield_of_the_righteous":
+            player.base_damage_reduction += upgrade.get("damage_reduction", 0.15)
+            player.damage_reduction = player.base_damage_reduction
         elif upgrade["effect"] == "purify":
             player.purify = True
             player.purify_timer = upgrade.get("duration", 2000)

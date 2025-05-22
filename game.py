@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+import math
 from settings import *
 from utils import draw_text, draw_background, apply_upgrade
 from sprites import Player, Enemy, Boss, Projectile, Coin, Pickup, Ability
@@ -124,6 +125,13 @@ class Game:
         
         # Handle abilities
         for ability in self.ability_list:
+            # player centered effects
+            if ability.effect_type == "divine_shield":
+                self.player.invulnerable = True
+            elif ability.effect_type == "divine_protection":
+                self.player.damage_reduction = max(self.player.damage_reduction, 0.5)
+            elif ability.effect_type == "renew":
+                self.player.health = min(self.player.max_health, self.player.health + 0.03 * dt)
             for enemy in self.enemy_group:
                 dx = enemy.rect.centerx - ability.x
                 dy = enemy.rect.centery - ability.y
@@ -132,26 +140,40 @@ class Game:
                         enemy.health -= 0.05 * dt
                     elif ability.effect_type == "frost_nova":
                         enemy.slow_timer = max(enemy.slow_timer, 1000)
+                        enemy.stun_timer = max(enemy.stun_timer, 500)
                         enemy.health -= 0.02 * dt
                     elif ability.effect_type == "trap":
                         enemy.slow_timer = max(enemy.slow_timer, 1500)
+                        enemy.health -= 0.5
                         if ability in self.ability_list:
                             self.ability_list.remove(ability)
                     elif ability.effect_type == "consecration":
                         enemy.health -= 0.03 * dt
                     elif ability.effect_type == "arcane_explosion":
                         enemy.health -= 0.04 * dt
+                        # slight knockback
+                        enemy.rect.x += int(dx * -0.1)
+                        enemy.rect.y += int(dy * -0.1)
                     elif ability.effect_type == "holy_smite":
                         enemy.health -= 0.04 * dt
                     elif ability.effect_type == "whirlwind":
                         enemy.health -= 0.06 * dt
+                        enemy.rect.x += int(dx * 0.1)
+                        enemy.rect.y += int(dy * 0.1)
                     elif ability.effect_type == "chain_lightning":
                         enemy.health -= 0.05 * dt
+                        # splash damage to nearby enemies
+                        for other in self.enemy_group:
+                            if other is not enemy:
+                                ox = other.rect.centerx - enemy.rect.centerx
+                                oy = other.rect.centery - enemy.rect.centery
+                                if math.hypot(ox, oy) <= ability.radius/2:
+                                    other.health -= 0.03 * dt
                     elif ability.effect_type == "hammer_of_justice":
                         enemy.health -= 0.05 * dt
-                        enemy.slow_timer = max(enemy.slow_timer, 2000)
+                        enemy.stun_timer = max(enemy.stun_timer, 1000)
                     elif ability.effect_type == "renew":
-                        self.player.health = min(self.player.max_health, self.player.health + 0.03 * dt)
+                        pass
                     if enemy.health <= 0:
                         enemy.kill()
                         self.player.xp += XP_PER_ENEMY
@@ -164,6 +186,11 @@ class Game:
             if current_time - info["last_trigger"] >= info["cooldown"]:
                 upgrade = info["upgrade"]
                 attached = effect in ["berserker_rage", "divine_shield"]
+                if upgrade["effect"] == "healing_wave":
+                    self.player.health = min(
+                        self.player.max_health,
+                        self.player.health + upgrade.get("heal_amount", 30)
+                    )
                 ability = Ability(
                     effect_type=upgrade["effect"],
                     x=self.player.rect.centerx,
@@ -180,6 +207,10 @@ class Game:
         for ability in self.ability_list[:]:
             ability.update(dt)
             if not ability.is_active():
+                if ability.effect_type == "divine_shield":
+                    self.player.invulnerable = False
+                elif ability.effect_type == "divine_protection":
+                    self.player.damage_reduction = self.player.base_damage_reduction
                 self.ability_list.remove(ability)
         
         # Spawn enemies
@@ -215,7 +246,7 @@ class Game:
             self.boss_spawned = True
         
         # Handle player-enemy collisions
-        if not self.player.camouflage:
+        if not self.player.camouflage and not self.player.invulnerable:
             collisions = pygame.sprite.spritecollide(self.player, self.enemy_group, True)
             if collisions:
                 damage = 20 * len(collisions) * (1 - self.player.damage_reduction)

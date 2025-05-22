@@ -48,7 +48,7 @@ upgrades_dict = {
         {"name": "Trap", "effect": "trap", "periodic": True, "cooldown": 6000,
          "radius": 40, "duration": 3000, "slow_factor": 0.5},
         {"name": "Focus Shot", "effect": "buff", "periodic": False, "damage_buff": 0.5},
-        {"name": "Eagle Eye", "effect": "buff", "periodic": False, "range_bonus": 10},
+        {"name": "Eagle Eye", "effect": "eagle_eye", "periodic": False, "range_bonus": 2},
         {"name": "Rapid Fire", "effect": "rapid_fire", "periodic": False, "reduction": 100},
         {"name": "Camouflage", "effect": "camouflage", "periodic": False, "duration": 3000}
     ],
@@ -68,7 +68,7 @@ upgrades_dict = {
          "radius": 75, "duration": 2500, "damage_over_time": 0.1},
         {"name": "Judgment", "effect": "buff", "periodic": False, "damage_buff": 0.5},
         {"name": "Divine Protection", "effect": "divine_protection", "periodic": True, "cooldown": 5000,
-         "radius": 40, "duration": 2000},
+         "radius": 40, "duration": 2000, "damage_reduction": 0.5},
         {"name": "Shield of the Righteous", "effect": "shield_of_the_righteous", "periodic": False, "damage_reduction": 0.15},
         {"name": "Hammer of Justice", "effect": "hammer_of_justice", "periodic": True, "cooldown": 6000,
          "radius": 50, "duration": 1500}
