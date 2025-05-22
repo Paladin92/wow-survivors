@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+import math
 from settings import *
 from utils import draw_text, draw_background, apply_upgrade
 from sprites import Player, Enemy, Boss, Projectile, Coin, Pickup, Ability
