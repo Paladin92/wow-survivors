@@ -6,7 +6,7 @@ from game import Game
 # Initialize pygame
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("WoW Survivor")
+pygame.display.set_caption("WoW Survivors")
 clock = pygame.time.Clock()
 
 # Create game instance
